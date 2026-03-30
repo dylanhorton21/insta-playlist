@@ -1,0 +1,45 @@
+{
+"nameOfChannel": "Fox Feed",
+"author": {
+    "name": "dylan_horton_fox",
+    "image": "",
+    "userSince": "10-17-2025"
+},
+"photos":[
+    {
+        "id": 1,
+        "name": "Fox 1",
+        "dateTaken": "2025",
+        "thumbnail": "https://randomfox.ca/images/1.jpg",
+        "fullSource": "https://randomfox.ca/images/1.jpg"
+    },
+    {
+        "id": 2,
+        "name": "Fox 2",
+        "dateTaken": "2025",
+        "thumbnail": "https://randomfox.ca/images/2.jpg",
+        "fullSource": "https://randomfox.ca/images/2.jpg"
+    },
+    {
+        "id": 3,
+        "name": "Fox 3",
+        "dateTaken": "2025",
+        "thumbnail": "https://randomfox.ca/images/3.jpg",
+        "fullSource": "https://randomfox.ca/images/3.jpg"
+    },
+    {
+        "id": 4,
+        "name": "Fox 4",
+        "dateTaken": "2025",
+        "thumbnail": "https://randomfox.ca/images/4.jpg",
+        "fullSource": "https://randomfox.ca/images/4.jpg"
+    },
+    {
+        "id": 5,
+        "name": "Fox 5",
+        "dateTaken": "2025",
+        "thumbnail": "https://randomfox.ca/images/5.jpg",
+        "fullSource": "https://randomfox.ca/images/5.jpg"
+    }
+]
+}
