@@ -1,5 +1,6 @@
-{
-"channel": "InstaFox",
+export function GET(){
+    return Response.json({
+        "channel": "InstaFox",
 "author": {
     "name": "dylan_horton_fox",
     "image": "",
@@ -125,4 +126,5 @@
         "fullSource": "https://randomfox.ca/images/15.jpg"
     }
 ]
+    })
 }

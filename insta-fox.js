@@ -14,6 +14,8 @@ export class InstaFox extends DDDSuper(LitElement){
         loading: {type: Boolean},
         activeIndex: {type: Number},
         likes: {type: Object},
+        author:{type:Object},
+        channel:{type: String},
         };
         constructor(){
             super();
@@ -21,6 +23,13 @@ export class InstaFox extends DDDSuper(LitElement){
             this.loading = true;
             this.activeIndex = 0;
             this.likes = {};
+            const params = new URLSearchParams(window.location.search);
+            const index = Number(params.get("activeIndex"));
+            if(!isNaN(index)){
+                this.activeIndex = index;
+            }
+            this.author ={};
+            this.channel = "";
         }
         connectedCallback(){
             super.connectedCallback();
@@ -28,25 +37,30 @@ export class InstaFox extends DDDSuper(LitElement){
             this.loadFromStorage();
         }
         async loadData(){
-            const url = new URL("./data.json", import.meta.url).href;
-            const res = await fetch(url);
+            const res = await fetch("/api/foxphotos");
             const data = await res.json();
             this.photos = data.photos;
             this.loading = false;
+            this.author = data.author;
+            this.channel = data.channel;
         }
         nextPhoto(){
             if(this.activeIndex < this.photos.length - 1){
                 this.activeIndex++;
+                this.updateQueryParam("activeIndex", this.activeIndex);
             }
         }
         previousPhoto(){
             if(this.activeIndex > 0){
                 this.activeIndex--;
+                this.updateQueryParam("activeIndex", this.activeIndex);
             }
         }
         dotPhoto(index){
             this.activeIndex = index;
+            this.updateQueryParam("activeIndex", this.activeIndex);
         }
+    
         saveStorage(){
             localStorage.setItem("likes", JSON.stringify(this.likes));
         }
@@ -65,30 +79,58 @@ export class InstaFox extends DDDSuper(LitElement){
             this.likes = {...this.likes};
             this.saveStorage();
         }
+        async share(){
+            try{
+                await navigator.clipboard.writeText(window.location.href);
+                alert("Link copied");
+            }
+            catch (error){
+                console.error("Copy error", error);
+            }
+            }
+        
+        updateQueryParam(key,value){
+            const currentURL = new URL(window.location.href);
+            currentURL.searchParams.set(key, value);
+            history.pushState(null, "", currentURL.toString())
+        }
+
         static styles = css`
+        :host{
+            color-scheme: light dark;
+        }
         .card{
-            background: var(--ddd-theme-default-white);
-            color: var(--ddd-theme-default-black);
+            background: light-dark(var(--ddd-theme-default-white), black);
+            color: light-dark(var(--ddd-theme-default-black), white);
             max-width: 400px;
             margin: 30px auto;
-            border: 1px solid #ddd;
+            border: 1px solid light-dark(#ddd,black);
             border-radius: 14px;
-            background: white;
+            width: min(400px, 92vw);
         }
         .header{
-            display: flex;
-            justify-content: center;
             padding: 5px;
         }
         .appname{
             font-size: 30px;
         }
-        img {
+        .image{
             width: 100%;
+            height: 500px;
+            overflow: hidden;
+            background: light-dark(var(--ddd-theme-default-white), black);
             display: block;
         }
+        .image img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
         .caption {
             padding: 10px;
+            color: light-dark(var(--ddd-theme-default-black), white);
         }
         .navigation{
             display: flex;
@@ -98,9 +140,10 @@ export class InstaFox extends DDDSuper(LitElement){
         
         }
         button{
-            border: 1px solid black;
+            border: 1px solid light-dark(black, white);
             border-radius: 8px;
-            background: var(--ddd-theme-default-white);
+            background: light-dark(var(--ddd-theme-default-white), black);
+            color: light-dark(var(--ddd-theme-default-black), white);
             cursor: pointer;
         }
         .allDots{
@@ -112,48 +155,55 @@ export class InstaFox extends DDDSuper(LitElement){
         .dot{
             cursor: pointer;
             font-size: 14px;
-            color: var(--ddd-theme-default-black);
+            color: light-dark(var(--ddd-theme-default-black), white);
             opacity: .25;
         }
         .dot.active{
-            color: var(--ddd-theme-default-black);
+            color: light-dark(var(--ddd-theme-default-black), white);
             opacity: 1;
 
         }
         .heart{
            cursor:pointer;
+           color: light-dark(var(--ddd-theme-default-black), white);
         }
+            
+        
         `;
         render(){
             
             if(this.loading){
-                return html`<p>This loads a fox!!!</p>`;
+                return html`<p>Loading page</p>`;
             }
             const photo = this.photos[this.activeIndex];
             return html`
             <div class = "card">
                 <div class="header">
-                <div class= "appname">InstaFox</div>
+                <span>${this.author.name}</span>
+                <span style="float:right;">${this.channel}</span>
                 </div>
+                <a href ="${photo.fullSource}" target="_blank" class="image">
                 <img src = "${photo.thumbnail}" alt="${photo.name}" loading="lazy" />
+                </a>
                 <div class = "caption">
                     <span class="heart" @click="${() =>this.toggleLike(photo.id)}">
                         ${this.likes[photo.id] ? "♥︎" : "♡"}
                     </span>
+                    <button @click="${this.share}">Share</button>
                     ${photo.name}
-                    <div>
-                    Fox photos from today
-                    </div>
+                    <div></div>
+                    ${photo.description}, ${photo.dateTaken}
+                    
                       
                 </div>
                 <div class = "navigation">
-                    <button @click= "${this.previousPhoto}" ?disabled = "${this.activeIndex === 0}">
-                        <
+                    <button @click= "${this.previousPhoto}" ?disabled = "${this.activeIndex === 0}" title="Previous photo">
+                        Previous
                     </button>
 
                     
-                    <button @click="${this.nextPhoto}" ?disabled = "${this.activeIndex === this.photos.length - 1}">
-                        >
+                    <button @click="${this.nextPhoto}" ?disabled = "${this.activeIndex === this.photos.length - 1}" title="Next photo">
+                        Next
                     </button>
                 </div>
                 <div class = "allDots">
